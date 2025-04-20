@@ -1,95 +1,81 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+
+'use client'
+
+import { useState } from 'react';
+import styles from './page.module.css';
 
 export default function Home() {
-  return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol>
-          <li>
-            Get started by editing <code>src/app/page.js</code>.
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const [query, setQuery] = useState('');
+  const [results, setResults] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.secondary}
-          >
-            Read our docs
-          </a>
+  const searchBooks = async (e) => {
+    e.preventDefault();
+    if (!query.trim()) return;
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch(
+        `https://openlibrary.org/search.json?q=${encodeURIComponent(query)}`
+      );
+      
+      if (!response.ok) throw new Error('Failed to fetch results');
+      
+      const data = await response.json();
+      setResults(data.docs || []);
+    } catch (err) {
+      setError(err.message);
+      setResults([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className={styles.container}>
+      <h1 className={styles.title}>Book Search</h1>
+      
+      <form onSubmit={searchBooks} className={styles.searchForm}>
+        <input
+          type="text"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Search for books..."
+          className={styles.searchInput}
+        />
+        <button 
+          type="submit" 
+          className={styles.searchButton}
+          disabled={loading}
+        >
+          {loading ? 'Searching...' : 'Search'}
+        </button>
+      </form>
+
+      {error && <p className={styles.error}>Error: {error}</p>}
+
+      {results.length > 0 ? (
+        <div className={styles.resultsGrid}>
+          {results.map((book) => (
+            <div key={book.key} className={styles.bookCard}>
+              <h2>{book.title}</h2>
+              <p className={styles.author}>
+                {book.author_name?.join(', ') || 'Unknown Author'}
+              </p>
+              {book.first_publish_year && (
+                <p className={styles.publishYear}>
+                  First published: {book.first_publish_year}
+                </p>
+              )}
+            </div>
+          ))}
         </div>
-      </main>
-      <footer className={styles.footer}>
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      ) : (
+        !loading && !error && <p className={styles.noResults}>No books found. Try another search!</p>
+      )}
     </div>
   );
 }
