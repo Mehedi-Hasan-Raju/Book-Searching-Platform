@@ -1,8 +1,8 @@
 /* app/page.module.css */
 .container {
-  max-width: 1200px;
+  width: 100%;
   margin: 0 auto;
-  padding: 2rem 1rem;
+  padding: 2rem 1.5rem;
   min-height: 100vh;
   background-color: #f8fafc;
 }
@@ -19,7 +19,8 @@
   display: flex;
   gap: 1rem;
   margin-bottom: 2rem;
-  max-width: 600px;
+  width: 100%;
+  max-width: 800px;
   margin: 0 auto 2.5rem;
 }
 
@@ -30,7 +31,12 @@
   border-radius: 8px;
   font-size: 1rem;
   background: white;
+  color: #1e293b; /* Visible text color */
   transition: border-color 0.2s;
+}
+
+.searchInput::placeholder {
+  color: #94a3b8; /* Placeholder color */
 }
 
 .searchInput:focus {
@@ -53,11 +59,16 @@
   background-color: #2563eb;
 }
 
+.searchButton:disabled {
+  background-color: #94a3b8;
+  cursor: not-allowed;
+}
+
 .resultsGrid {
   display: grid;
   gap: 1.75rem;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  padding: 0 1rem;
+  width: 100%;
 }
 
 .bookCard {
@@ -138,17 +149,51 @@
   background: #059669;
 }
 
+.error {
+  text-align: center;
+  color: #ef4444;
+  font-weight: 500;
+  margin: 2rem 0;
+}
+
+.noResults {
+  text-align: center;
+  color: #64748b;
+  font-size: 1.1rem;
+  margin-top: 2rem;
+}
+
 /* Responsive adjustments */
-@media (max-width: 640px) {
+@media (max-width: 768px) {
+  .container {
+    padding: 1.5rem 1rem;
+  }
+
+  .title {
+    font-size: 2rem;
+  }
+
+  .searchForm {
+    flex-direction: column;
+    max-width: 100%;
+  }
+
+  .searchInput {
+    width: 100%;
+    max-width: none;
+  }
+
   .resultsGrid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  }
+}
+
+@media (max-width: 480px) {
+  .title {
+    font-size: 1.75rem;
   }
   
   .bookCover, .bookCoverPlaceholder {
     height: 200px;
-  }
-  
-  .title {
-    font-size: 1.875rem;
   }
 }
